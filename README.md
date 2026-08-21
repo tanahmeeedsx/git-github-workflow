@@ -1,4 +1,4 @@
-## Changed from LOCAL side
+## Merged: changes from both LOCAL and GITHUB
 ## Clone this repository in your local machine
 
 ### Install & Run Tests Locally 
