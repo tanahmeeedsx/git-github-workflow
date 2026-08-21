@@ -1,4 +1,4 @@
-## Edited directly on GitHub
+## Changed from LOCAL side
 ## Clone this repository in your local machine
 
 ### Install & Run Tests Locally 
