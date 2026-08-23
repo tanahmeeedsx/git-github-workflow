@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>CI/CD & Security Workflow Demo</title>
+  <style>
+    :root {
+      --bg: #0f172a;
+      --card-bg: #1e293b;
+      --text: #f8fafc;
+      --text-muted: #94a3b8;
+      --primary: #38bdf8;
+      --success: #22c55e;
+      --warning: #f59e0b;
+      --accent: #818cf8;
+      --border: #334155;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; }
+    body { background-color: var(--bg); color: var(--text); padding: 2rem 1rem; min-height: 100vh; display: flex; flex-direction: column; align-items: center; }
+    .container { max-width: 900px; width: 100%; }
+    header { text-align: center; margin-bottom: 2rem; }
+    h1 { font-size: 2.25rem; font-weight: 800; background: linear-gradient(135deg, var(--primary), var(--accent)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin-bottom: 0.5rem; }
+    .subtitle { color: var(--text-muted); font-size: 1.1rem; }
+    .badge-bar { display: flex; justify-content: center; gap: 0.5rem; flex-wrap: wrap; margin-top: 1rem; }
+    .badge { background: #334155; padding: 0.35rem 0.75rem; border-radius: 9999px; font-size: 0.8rem; font-weight: 600; display: inline-flex; align-items: center; gap: 0.4rem; }
+    .badge.green { background: rgba(34, 197, 94, 0.2); color: #4ade80; border: 1px solid rgba(34, 197, 94, 0.3); }
+    .badge.blue { background: rgba(56, 189, 248, 0.2); color: #38bdf8; border: 1px solid rgba(56, 189, 248, 0.3); }
+    .badge.purple { background: rgba(129, 140, 248, 0.2); color: #a5b4fc; border: 1px solid rgba(129, 140, 248, 0.3); }
+
+    .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-bottom: 2rem; }
+    @media (max-width: 768px) { .grid { grid-template-columns: 1fr; } }
+
+    .card { background: var(--card-bg); border: 1px solid var(--border); border-radius: 12px; padding: 1.5rem; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.3); }
+    .card-title { font-size: 1.25rem; font-weight: 700; margin-bottom: 1rem; display: flex; align-items: center; gap: 0.5rem; }
+    
+    /* Calculator widget */
+    .form-group { margin-bottom: 1rem; }
+    label { display: block; font-size: 0.85rem; color: var(--text-muted); margin-bottom: 0.25rem; }
+    input[type="number"] { width: 100%; padding: 0.75rem; border-radius: 8px; border: 1px solid var(--border); background: #0f172a; color: white; font-size: 1rem; }
+    input[type="number"]:focus { outline: 2px solid var(--primary); border-color: transparent; }
+    .btn-group { display: grid; grid-template-columns: repeat(4, 1fr); gap: 0.5rem; margin-top: 1rem; }
+    button { padding: 0.75rem; border: none; border-radius: 8px; font-weight: 700; cursor: pointer; transition: all 0.2s; font-size: 1.1rem; }
+    .btn-op { background: #334155; color: white; }
+    .btn-op:hover { background: var(--primary); color: #0f172a; }
+    .result-box { margin-top: 1.25rem; padding: 1rem; border-radius: 8px; background: #0f172a; border: 1px dashed var(--border); text-align: center; }
+    .result-value { font-size: 1.5rem; font-weight: 700; color: var(--primary); }
+
+    /* Pipeline overview */
+    .pipeline-step { display: flex; align-items: flex-start; gap: 1rem; padding: 0.75rem 0; border-bottom: 1px solid rgba(255, 255, 255, 0.05); }
+    .pipeline-step:last-child { border-bottom: none; }
+    .step-icon { width: 2rem; height: 2rem; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 0.9rem; flex-shrink: 0; font-weight: bold; }
+    .icon-ci { background: rgba(56, 189, 248, 0.2); color: var(--primary); }
+    .icon-sec { background: rgba(245, 158, 11, 0.2); color: var(--warning); }
+    .icon-cd { background: rgba(34, 197, 94, 0.2); color: var(--success); }
+    .step-info h4 { font-size: 0.95rem; margin-bottom: 0.2rem; }
+    .step-info p { font-size: 0.8rem; color: var(--text-muted); }
+
+    .full-width-card { background: var(--card-bg); border: 1px solid var(--border); border-radius: 12px; padding: 1.5rem; margin-bottom: 2rem; }
+    pre { background: #0f172a; padding: 1rem; border-radius: 8px; overflow-x: auto; font-size: 0.85rem; color: #38bdf8; margin-top: 0.5rem; }
+    footer { text-align: center; color: var(--text-muted); font-size: 0.85rem; margin-top: auto; padding-top: 2rem; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>Automated CI/CD & DevSecOps Pipeline</h1>
+      <p class="subtitle">Continuous Integration, Security Practices & Continuous Deployment via GitHub Actions</p>
+      <div class="badge-bar">
+        <span class="badge green">✓ Automated Testing (Jest)</span>
+        <span class="badge blue">✓ ESLint & Quality Gates</span>
+        <span class="badge purple">✓ CodeQL SAST & Audit</span>
+        <span class="badge green">✓ Automated CD Deployment</span>
+      </div>
+    </header>
+
+    <div class="grid">
+      <!-- Interactive Calculator Card -->
+      <div class="card">
+        <div class="card-title">🧮 Live Calculator Application</div>
+        <div class="form-group">
+          <label for="numA">Number A</label>
+          <input type="number" id="numA" value="12" />
+        </div>
+        <div class="form-group">
+          <label for="numB">Number B</label>
+          <input type="number" id="numB" value="4" />
+        </div>
+        <div class="btn-group">
+          <button class="btn-op" onclick="calculate('add')">+</button>
+          <button class="btn-op" onclick="calculate('subtract')">−</button>
+          <button class="btn-op" onclick="calculate('multiply')">×</button>
+          <button class="btn-op" onclick="calculate('divide')">÷</button>
+        </div>
+        <div class="result-box">
+          <div>Result:</div>
+          <div class="result-value" id="calcResult">16</div>
+        </div>
+      </div>
+
+      <!-- Pipeline Workflow Card -->
+      <div class="card">
+        <div class="card-title">⚡ GitHub Actions Automation</div>
+        
+        <div class="pipeline-step">
+          <div class="step-icon icon-ci">CI</div>
+          <div class="step-info">
+            <h4>1. Continuous Integration</h4>
+            <p>Runs ESLint static checks & Jest test suite across matrix of Node versions (18.x, 20.x, 22.x) with coverage reports.</p>
+          </div>
+        </div>
+
+        <div class="pipeline-step">
+          <div class="step-icon icon-sec">SEC</div>
+          <div class="step-info">
+            <h4>2. Security Practices (DevSecOps)</h4>
+            <p>GitHub CodeQL SAST scanning, dependency vulnerability audit (<code>npm audit</code>), secret scanning, and least privilege permissions.</p>
+          </div>
+        </div>
+
+        <div class="pipeline-step">
+          <div class="step-icon icon-cd">CD</div>
+          <div class="step-info">
+            <h4>3. Continuous Deployment</h4>
+            <p>Automated build packaging and live deployment to GitHub Pages upon push/merge to <code>main</code> branch.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Security & Best Practices Section -->
+    <div class="full-width-card">
+      <div class="card-title">🔒 Security & Pipeline Highlights</div>
+      <p style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 0.75rem;">
+        This repository demonstrates enterprise GitHub Actions workflows incorporating automated testing, code quality gates, static vulnerability analysis, and zero-downtime deployment.
+      </p>
+      <pre><code># Workflow Summary:
+- CI: Matrix Testing [Node 18, 20, 22] + ESLint + Jest Coverage Artifacts
+- Security: CodeQL JavaScript Engine + npm audit check + Secret Scanning
+- CD: GitHub Pages deployment with secure GitHub OIDC tokens</code></pre>
+    </div>
+
+    <footer>
+      <p>Continuous Integration, Security & Continuous Deployment Workflow Demo</p>
+    </footer>
+  </div>
+
+  <script>
+    function add(a, b) { return a + b; }
+    function subtract(a, b) { return a - b; }
+    function multiply(a, b) { return a * b; }
+    function divide(a, b) {
+      if (b === 0) throw new Error('Division by zero is not allowed');
+      return a / b;
+    }
+
+    function calculate(op) {
+      const a = parseFloat(document.getElementById('numA').value);
+      const b = parseFloat(document.getElementById('numB').value);
+      const resultElem = document.getElementById('calcResult');
+
+      if (isNaN(a) || isNaN(b)) {
+        resultElem.textContent = 'Invalid Input';
+        resultElem.style.color = '#ef4444';
+        return;
+      }
+
+      try {
+        let res;
+        switch(op) {
+          case 'add': res = add(a, b); break;
+          case 'subtract': res = subtract(a, b); break;
+          case 'multiply': res = multiply(a, b); break;
+          case 'divide': res = divide(a, b); break;
+        }
+        resultElem.textContent = res;
+        resultElem.style.color = '#38bdf8';
+      } catch (err) {
+        resultElem.textContent = err.message;
+        resultElem.style.color = '#ef4444';
+      }
+    }
+  </script>
+</body>
+</html>
