@@ -81,9 +81,14 @@ jobs:
     name: Dependency Review
     if: github.event_name == 'pull_request'
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
 
       - name: Dependency Review Action
+        if: github.event_name == 'pull_request'
         uses: actions/dependency-review-action@v4
+        with:
+          fail-on-severity: high
