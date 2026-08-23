@@ -3,9 +3,15 @@
   "version": "1.0.0",
   "description": "Simple JavaScript app with tests and GitHub Actions",
   "scripts": {
-    "test": "jest"
+    "test": "jest",
+    "test:coverage": "jest --coverage",
+    "lint": "eslint src tests",
+    "lint:fix": "eslint src tests --fix",
+    "audit": "npm audit --audit-level=high",
+    "build": "node build.js"
   },
   "devDependencies": {
+    "eslint": "^10.9.0",
     "jest": "^29.7.0"
   },
   "main": "index.js",
