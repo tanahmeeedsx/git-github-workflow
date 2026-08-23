@@ -6,7 +6,6 @@ on:
   pull_request:
     branches: [ main ]
 
-# Least privilege permissions
 permissions:
   contents: read
 
@@ -14,14 +13,16 @@ jobs:
   lint:
     name: Code Quality & Linting
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Setup Node.js
+      - name: Setup Node.js 22
         uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: '22'
           cache: 'npm'
 
       - name: Install dependencies
@@ -33,6 +34,8 @@ jobs:
   test:
     name: Automated Tests (Node ${{ matrix.node-version }})
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     strategy:
       fail-fast: false
       matrix:
@@ -55,7 +58,7 @@ jobs:
         run: npm run test:coverage
 
       - name: Upload Test Coverage Artifact
-        if: matrix.node-version == '20.x'
+        if: matrix.node-version == '22.x'
         uses: actions/upload-artifact@v4
         with:
           name: coverage-report
@@ -65,14 +68,16 @@ jobs:
   security-audit:
     name: Dependency Vulnerability Audit
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Setup Node.js
+      - name: Setup Node.js 22
         uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: '22'
           cache: 'npm'
 
       - name: Install dependencies
