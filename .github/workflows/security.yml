@@ -1,5 +1,4 @@
 name: Security - SAST, Secret Scanning & Dependency Review
-
 on:
   push:
     branches: [ main ]
@@ -7,10 +6,8 @@ on:
     branches: [ main ]
   schedule:
     - cron: '30 1 * * 1' # Weekly scan every Monday at 01:30 UTC
-
 permissions:
   contents: read
-
 jobs:
   codeql-analysis:
     name: CodeQL Static Security Analysis (SAST)
@@ -19,33 +16,27 @@ jobs:
       contents: read
       security-events: write
       actions: read
-
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
-
       - name: Initialize CodeQL
         uses: github/codeql-action/init@v4
         with:
           languages: 'javascript-typescript'
-
       - name: Perform CodeQL Analysis
         uses: github/codeql-action/analyze@v4
         with:
           category: '/language:javascript-typescript'
-
   secret-scan:
     name: Secret & Credential Scanning
     runs-on: ubuntu-latest
     permissions:
       contents: read
-
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
-
       - name: TruffleHog Secret Scanner (Pull Request)
         if: github.event_name == 'pull_request'
         uses: trufflesecurity/trufflehog@main
@@ -54,7 +45,6 @@ jobs:
           base: ${{ github.event.pull_request.base.sha }}
           head: ${{ github.event.pull_request.head.sha }}
           extra_args: --debug --only-verified
-
       - name: TruffleHog Secret Scanner (Push Range)
         if: >-
           github.event_name == 'push' &&
@@ -67,7 +57,6 @@ jobs:
           base: ${{ github.event.before }}
           head: ${{ github.sha }}
           extra_args: --debug --only-verified
-
       - name: TruffleHog Secret Scanner (Full Repository Scan)
         if: >-
           github.event_name == 'schedule' ||
@@ -81,21 +70,19 @@ jobs:
         with:
           path: ./
           extra_args: --debug --only-verified
-
   dependency-review:
     name: Dependency Review
-    if: github.event_name == 'pull_request'
+    if: >-
+      github.event_name == 'pull_request' &&
+      github.event.pull_request.head.repo.full_name == github.repository
     runs-on: ubuntu-latest
     permissions:
       contents: read
       pull-requests: write
-
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
-
       - name: Dependency Review Action
-        if: github.event_name == 'pull_request'
         uses: actions/dependency-review-action@v4
         with:
           fail-on-severity: high
